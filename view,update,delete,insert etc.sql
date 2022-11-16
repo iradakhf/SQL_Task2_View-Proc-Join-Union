@@ -235,7 +235,7 @@ Join Authors a on b.AuthorId = a.Id
 
 ---Gonderilmis axtaris deyirene gore hemin axtaris deyeri name ve ya authorFullNamelerinde----
 ---olan Book-lari Id, Name, PageCount, AuthorFullName columnlari seklinde gostern procedure yazin----
-Create Procedure usp_GetBookNameOrItsAuthorFullName @name nvarchar(100), @authorFullName nvarchar(300)
+Create Procedure usp_GetBookNameOrItsAuthorFullName @name nvarchar(100)
 As
 Select 
 b.Id, 
@@ -245,71 +245,91 @@ b.PageCount 'Page Count',
 from 
 Books b
 Join Authors a on b.AuthorId = a.Id
-where b.Name= @name or (a.Name + ' '+ a.Surname) = @authorFullName
+where b.Name= @name or (a.Name + ' '+ a.Surname) = @name
 
-exec usp_GetBookNameOrItsAuthorFullName 'book-1', 'jijio'
+exec usp_GetBookNameOrItsAuthorFullName 'book-1'
 
 
 ---Authors tableinin insert, update ve deleti ucun (her biri ucun ayrica) procedure yaradin--
-Create Table AuthorsArchieve
-(
-Id int not null,
-Name nvarchar(100),
-Surname nvarchar(100),
-Status nvarchar(100),
-Date datetime2
-)
-
-Create Trigger AuthorInsertedDataCopy
-on Authors
-after insert
+create procedure usp_InsertDataToAuthors @name nvarchar(100), @surname nvarchar(100)
 as
-begin
+insert into Authors (Name,Surname)
+values (@name,@surname)  
 
-   declare @Id int
-   declare @Name nvarchar(100)
-   declare @Surname nvarchar(100)
-   declare @Status nvarchar(100)
-   declare @Date datetime2
+exec usp_InsertDataToAuthors 'Irada', 'Feyzullayeva'
 
-   Select  @Id=Id from inserted
-   Select  @Name=Name from inserted
-   Select  @Surname=Surname from inserted
-   Select  @Status='Inserted' from inserted
-   Select  @Date=GETDATE() from inserted
+create procedure usp_UpdateDataInAuthors @id int, @name nvarchar(100), @surname nvarchar(100)
+as
+update Authors set Name = @name, Surname = @surname
+where Id = @id
+
+exec usp_UpdateDataInAuthors 1, 'Irada', 'Feyzullayeva'
 
 
-   Insert into AuthorsArchieve(Id,Name,Surname,Status, Date)
-   values
-   (@Id, @Name, @Surname, @Status , @Date)
-end
+create procedure usp_DeleteDataOnAuthors @id int
+as
+delete Authors where Id=@id
+
+exec usp_DeleteDataOnAuthors 8
+
+--Create Table AuthorsArchieve
+--(
+--Id int not null,
+--Name nvarchar(100),
+--Surname nvarchar(100),
+--Status nvarchar(100),
+--Date datetime2
+--)
+
+--Create Trigger AuthorInsertedDataCopy
+--on Authors
+--after insert
+--as
+--begin
+
+--   declare @Id int
+--   declare @Name nvarchar(100)
+--   declare @Surname nvarchar(100)
+--   declare @Status nvarchar(100)
+--   declare @Date datetime2
+
+--   Select  @Id=Id from inserted
+--   Select  @Name=Name from inserted
+--   Select  @Surname=Surname from inserted
+--   Select  @Status='Inserted' from inserted
+--   Select  @Date=GETDATE() from inserted
+
+
+--   Insert into AuthorsArchieve(Id,Name,Surname,Status, Date)
+--   values
+--   (@Id, @Name, @Surname, @Status , @Date)
+--end
 ----Deleted--
-Create Trigger AuthorDeletedDataCopy
-on Authors
-after delete
-as
-begin
+--Create Trigger AuthorDeletedDataCopy
+--on Authors
+--after delete
+--as
+--begin
+--   declare @Id int
+--   declare @Name nvarchar(100)
+--   declare @Surname nvarchar(100)
+--   declare @Status nvarchar(100)
+--   declare @Date datetime2
 
-   declare @Id int
-   declare @Name nvarchar(100)
-   declare @Surname nvarchar(100)
-   declare @Status nvarchar(100)
-   declare @Date datetime2
+--   Select  @Id=Id from deleted
+--   Select  @Name=Name from deleted
+--   Select  @Surname=Surname from deleted
+--   Select  @Status='Deleted' from deleted
+--   Select  @Date=GETDATE() from deleted
 
-   Select  @Id=Id from deleted
-   Select  @Name=Name from deleted
-   Select  @Surname=Surname from deleted
-   Select  @Status='Deleted' from deleted
-   Select  @Date=GETDATE() from deleted
-
-    Delete from AuthorsArchieve
-  where
-  Id=@Id AND Name=@Name AND Surname=@Surname
+--    Delete from AuthorsArchieve
+--  where
+--  Id=@Id AND Name=@Name AND Surname=@Surname
   
-   Insert into AuthorsArchieve(Id,Name,Surname,Status, Date)
-   values
-   (@Id, @Name, @Surname, @Status , @Date)
-end
+--   Insert into AuthorsArchieve(Id,Name,Surname,Status, Date)
+--   values
+--   (@Id, @Name, @Surname, @Status , @Date)
+--end
 
 
 
